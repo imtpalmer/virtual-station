@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 8080, host: 80
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -43,6 +43,8 @@ Vagrant.configure(2) do |config|
      # Customize the amount of memory on the VM:
      vb.memory = "8192"
      vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
+     # Set the amount of RAM that the virtual graphics card should have
+     vb.customize ["modifyvm", :id, "--vram", "128"]
   end
 
   # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
@@ -62,13 +64,17 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
-     sudo apt-get install -y ubuntu-desktop
+     #sudo apt-get install -y ubuntu-desktop
      sudo apt-get install -y gnome-panel
-     #sudo apt-get install -y chef
-     reboot 
+     sudo apt-get install -y chef
+     # wget -qO - https://deb.packager.io/key | sudo apt-key add -
+     # echo "deb https://deb.packager.io/gh/opf/openproject-ce trusty stable/5" | sudo tee /etc/apt/sources.list.d/openproject.list
+     #sudo apt-get update
+     #sudo apt-get install -y openproject
   SHELL
 
-  #config.vm.provision "chef_solo" do |chef|
-   #chef.add_recipe "apache"
-  #end
+  config.vm.provision "chef_solo" do |chef|
+    chef.cookbooks_path = ["chef-repo/cookbooks"]
+    chef.add_recipe "apt"
+  end
 end
